@@ -1,0 +1,5 @@
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 2rem; color: #111; }
+nav a { margin-right: .5em; color: #0a66c2; text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+h1 { letter-spacing: -.02em; }
+canvas { border: 1px solid #ddd; border-radius: 8px; }

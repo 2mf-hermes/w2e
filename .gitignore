@@ -1,0 +1,31 @@
+# Build output
+/dist/
+/bin/*.exe
+/bin/*.dll
+/build/release/
+/runtime/downloaded/
+
+# Temporary build dirs
+*.tmp/
+/tmp/
+
+# Test artifacts
+/tests/tmp/
+/tests/build-out/
+testweb/
+testoutput/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Go
+vendor/
+*.exe~

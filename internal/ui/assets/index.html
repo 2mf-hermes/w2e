@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>w2e</title>
+  <link rel="stylesheet" href="/app.css?v=20260816" />
+</head>
+<body class="app-shell">
+
+  <!-- ── Header bar ── -->
+  <header class="glass-bar" role="banner">
+    <div class="brand">
+      <span class="brand-glyph" aria-hidden="true">⬡</span>
+      <div class="brand-text">
+        <h1 class="brand-name" data-i18n="app.title">w2e</h1>
+        <span class="brand-tag" data-i18n="app.tagline">Web → Native App</span>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="apple-dropdown-wrap" id="locale-dropdown">
+        <span class="visually-hidden" data-i18n="settings.language">Language</span>
+        <button type="button" class="apple-dropdown-trigger" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+          <span class="apple-dropdown-value">English</span>
+          <svg class="apple-dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <input type="hidden" id="locale-select" value="en" />
+        <ul class="apple-dropdown-menu" role="listbox" aria-label="Language">
+          <li role="option" data-value="en" class="apple-dropdown-item active">English</li>
+          <li role="option" data-value="zh-TW" class="apple-dropdown-item">繁體中文</li>
+          <li role="option" data-value="zh-CN" class="apple-dropdown-item">简体中文</li>
+          <li role="option" data-value="ja" class="apple-dropdown-item">日本語</li>
+          <li role="option" data-value="ko" class="apple-dropdown-item">한국어</li>
+        </ul>
+      </div>
+      <div class="theme-slider" role="group" aria-label="Theme" id="theme-slider">
+        <span class="slider-pill" data-pos="1"></span>
+        <button type="button" class="theme-slider-item" data-theme-set="dark" data-i18n-title="settings.theme.dark" title="Dark">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.4 9.6A5.5 5.5 0 016.4 2.6a.75.75 0 00.07-1.05A5.5 5.5 0 1014.45 7.33a.75.75 0 00-1.05.07z" fill="currentColor"/></svg>
+        </button>
+        <button type="button" class="theme-slider-item active" data-theme-set="auto" data-i18n-title="settings.theme.system" title="System">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 14h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="theme-slider-item" data-theme-set="light" data-i18n-title="settings.theme.light" title="Light">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.76 3.76l1.06 1.06M11.18 11.18l1.06 1.06M3.76 12.24l1.06-1.06M11.18 4.82l1.06-1.06" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Wizard card ── -->
+  <main class="glass-card wizard-card" role="main" aria-labelledby="form-title">
+
+    <!-- Step indicator -->
+    <div class="wizard-indicator" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4">
+      <div class="wiz-dot active" data-step="1"><span>1</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-dot" data-step="2"><span>2</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-dot" data-step="3"><span>3</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-dot" data-step="4"><span>4</span></div>
+    </div>
+
+    <form id="build-form" class="wizard-body" novalidate>
+
+      <!-- ─── Step 1: App Settings ─── -->
+      <section class="wizard-step active" data-step="1">
+        <div class="step-head">
+          <h2 class="step-title" data-i18n="wizard.step1.title">應用程式設定</h2>
+          <p class="step-sub" data-i18n="wizard.step1.sub">設定視窗標題、尺寸與應用程式圖標。</p>
+        </div>
+        <div class="step-fields">
+          <label class="field-label" data-i18n="window.title">視窗標題</label>
+          <input id="window-title" name="window_title" type="text"
+                 placeholder="My App" autocomplete="off" class="glass-input" />
+
+          <div class="field-row">
+            <label class="micro">
+              <span data-i18n="window.width">寬度</span>
+              <input id="width" name="width" type="number" min="320" max="4000" value="1024" class="glass-input" />
+            </label>
+            <label class="micro">
+              <span data-i18n="window.height">高度</span>
+              <input id="height" name="height" type="number" min="240" max="4000" value="720" class="glass-input" />
+            </label>
+            <label class="micro switch-wrap">
+              <span data-i18n="window.resizable">可調大小</span>
+              <button type="button" id="resizable" class="glass-switch" role="switch" aria-checked="true" aria-label="Resizable"></button>
+            </label>
+          </div>
+
+          <label class="field-label" data-i18n="window.icon">應用程式圖標</label>
+          <div class="input-row">
+            <input id="icon" name="icon" type="text"
+                   placeholder=".ico / .png (optional)" autocomplete="off" class="glass-input" />
+            <button type="button" class="glass-btn browse-btn" data-browse="icon" data-i18n="action.browse">瀏覽…</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Step 2: Web Source ─── -->
+      <section class="wizard-step" data-step="2">
+        <div class="step-head">
+          <h2 class="step-title" data-i18n="wizard.step2.title">選擇網頁來源</h2>
+          <p class="step-sub" data-i18n="wizard.step2.sub">選擇包含 index.html 的 Web 專案目錄。</p>
+        </div>
+        <div class="step-fields">
+          <label class="field-label" data-i18n="project.directory">網頁目錄</label>
+          <div class="input-row">
+            <input id="source-dir" name="source_dir" type="text" required
+                   placeholder="C:\path\to\web-project" autocomplete="off" class="glass-input" />
+            <button type="button" class="glass-btn browse-btn" data-browse="source-dir" data-i18n="action.browse">瀏覽…</button>
+          </div>
+          <p class="field-hint" data-i18n="hint.sourceDir">目錄內需包含 index.html 或主要入口檔案。</p>
+        </div>
+      </section>
+
+      <!-- ─── Step 3: Output ─── -->
+      <section class="wizard-step" data-step="3">
+        <div class="step-head">
+          <h2 class="step-title" data-i18n="wizard.step3.title">輸出設定</h2>
+          <p class="step-sub" data-i18n="wizard.step3.sub">指定打包後的執行檔儲存位置。</p>
+        </div>
+        <div class="step-fields">
+          <label class="field-label" data-i18n="field.output">輸出路徑</label>
+          <div class="input-row">
+            <input id="output" name="output" type="text" required
+                   placeholder="C:\release\MyApp.exe" autocomplete="off" class="glass-input" />
+            <button type="button" class="glass-btn browse-btn" data-browse="output" data-i18n="action.browse">瀏覽…</button>
+          </div>
+          <p class="field-hint" data-i18n="hint.outputAuto">路徑會自動帶入網頁目錄位置與應用程式名稱。</p>
+        </div>
+      </section>
+
+      <!-- ─── Step 4: Platform ─── -->
+      <section class="wizard-step" data-step="4">
+        <div class="step-head">
+          <h2 class="step-title" data-i18n="wizard.step4.title">選擇目標平台</h2>
+          <p class="step-sub" data-i18n="wizard.step4.sub">選擇要輸出的作業系統平台。</p>
+        </div>
+        <div class="step-fields">
+          <div class="segmented target-seg glass-chip" role="radiogroup" aria-label="Target platform" id="target-group">
+            <button type="button" class="seg-btn active" data-target="windows" role="radio" aria-checked="true">
+              <span class="seg-label" data-i18n="target.windows">Windows</span>
+              <span class="seg-desc" data-i18n="target.windows.desc">EXE, GUI (WebView2)</span>
+            </button>
+            <button type="button" class="seg-btn" data-target="linux" role="radio" aria-checked="false">
+              <span class="seg-label" data-i18n="target.linux">Linux</span>
+              <span class="seg-desc" data-i18n="target.linux.desc">ELF (WebKit2GTK)</span>
+            </button>
+            <button type="button" class="seg-btn" data-target="darwin" role="radio" aria-checked="false">
+              <span class="seg-label" data-i18n="target.darwin">macOS</span>
+              <span class="seg-desc" data-i18n="target.darwin.desc">Mach-O (WKWebView)</span>
+            </button>
+            <button type="button" class="seg-btn" data-target="all" role="radio" aria-checked="false">
+              <span class="seg-label" data-i18n="target.all">全部</span>
+              <span class="seg-desc" data-i18n="target.all.desc">Win + Linux + macOS</span>
+            </button>
+          </div>
+          <p class="field-hint" data-i18n="field.target.hint">Windows 為純 Go 編譯，完全自包含。Linux 與 macOS 需要在主機安裝對應的 C 工具鏈。</p>
+        </div>
+      </section>
+
+    </form>
+
+    <!-- Wizard navigation — buttons hidden via style as belt+suspenders against cache -->
+    <div class="wizard-nav">
+      <!-- 上一步: hidden on step 1 -->
+      <button type="button" class="glass-btn ghost" id="wiz-prev" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7L9 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="wizard.prev">上一步</span>
+      </button>
+      <div class="wizard-nav-spacer"></div>
+      <!-- 驗證: only visible on step 4 -->
+      <button type="button" class="glass-btn ghost" id="validate-btn" style="display:none" data-i18n="action.validate">驗證</button>
+      <!-- 下一步: hidden on step 4 -->
+      <button type="button" class="glass-btn primary" id="wiz-next">
+        <span data-i18n="wizard.next">下一步</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3L9 7L5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <!-- 開始打包: hidden until validated on step 4 -->
+      <button type="button" class="glass-btn primary" id="start-btn" style="display:none" data-i18n="action.start">開始打包</button>
+    </div>
+
+    <!-- Status / report (shown on step 4 or after build) -->
+    <div id="status" class="status" role="status" aria-live="polite" style="display:none"></div>
+    <ul id="report" class="report" style="display:none"></ul>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="glass-bar l2" role="contentinfo">
+    <span data-i18n="footer.note">Standalone native app generator — Windows · Linux · macOS</span>
+    <span class="meta">v<span id="app-version">—</span></span>
+  </footer>
+
+  <script src="/app.js?v=20260816"></script>
+</body>
+</html>
