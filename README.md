@@ -1,3 +1,8 @@
+<p align="center">
+  <b>🌐 Read this page in your language:</b><br>
+  <a href="README.md">English</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a>
+</p>
+
 # w2e — Web → Native EXE packager (Windows · Linux · macOS)
 
 w2e turns any HTML/CSS/JS/SPA web project into a **standalone native
@@ -11,7 +16,7 @@ It ships as two products from one codebase:
 
 | Product | What it does |
 | --- | --- |
-| **w2e Desktop** (`w2e.exe` / `w2e` / `w2e.app`) | Apple / iOS 26 "Liquid Glass" GUI. Pick a project, adjust the window, click **開始打包**, get one or all three binaries. |
+| **w2e Desktop** (`w2e.exe` / `w2e` / `w2e.app`) | Apple / iOS 26 "Liquid Glass" GUI. Pick a project, adjust the window, click **打包**, get one or all three binaries. |
 | **w2e MCP Server** (`w2e mcp`, or `w2e-mcp.exe`) | An MCP stdio server exposing 5 tools so AI agents (Claude Code, Codex, Gemini CLI, …) can validate / inspect / build / doctor / version programmatically. |
 
 ---
@@ -128,12 +133,6 @@ w2e help                Show this help
 given URL directly inside the platform webview — useful for packaging a
 hosted app as a desktop launcher.
 
-### Online-URL mode
-
-In addition to packaging a local web project, `w2e build --url https://...`
-produces an EXE that simply loads the given URL directly inside WebView2 —
-useful for packaging a hosted app as a desktop launcher.
-
 ---
 
 ## MCP integration
@@ -177,27 +176,20 @@ to by the host.
 
 ## How a build works (pipeline)
 
-1. **Validate** — confirm there's an entry HTML file, CSS, JS, and detect SPA
-   routing requirements.
+1. **Validate** — confirm there's an entry HTML file, CSS, JS, and detect SPA routing requirements.
 2. **Prepare** — create a throwaway Go module (`%TEMP%\w2e\build-XXXX\host`).
-3. **Embed** — copy the user's web assets into `host/web/`, generate a single
-   self-contained `main.go` that:
+3. **Embed** — copy the user's web assets into `host/web/`, generate a single self-contained `main.go` that:
    - serves them from an embedded `//go:embed all:web` FS,
    - listens on `127.0.0.1:0` (OS-assigned port, never `0.0.0.0`),
    - launches a WebView2 window pointed at the local server,
    - falls back to the entry HTML for SPA navigational routes,
    - routes `window.open` and external links to the system default browser.
-4. **Compile** — `go mod tidy && go build -ldflags "-H windowsgui"` →
-   produces `app.exe` (no console window).
-5. **Verify** — open the EXE in binary mode and parse the PE header to confirm
-   the subsystem is `IMAGE_SUBSYSTEM_WINDOWS_GUI` (2). Anyone tampering with
-   the build flags that re-introduce a console will be caught here.
-6. **Icon** — if an icon was provided, apply it via rcedit when available;
-   otherwise record the chosen path in `w2e-icon.json` beside the EXE.
+4. **Compile** — `go mod tidy && go build -ldflags "-H windowsgui"` → produces `app.exe` (no console window).
+5. **Verify** — open the EXE in binary mode and parse the PE header to confirm the subsystem is `IMAGE_SUBSYSTEM_WINDOWS_GUI` (2).
+6. **Icon** — if an icon was provided, apply it via rcedit when available; otherwise record the chosen path in `w2e-icon.json` beside the EXE.
 7. **Output** — copy the verified EXE to the requested output path.
 
-The same `builder.Engine` powers CLI, MCP, and GUI — there is exactly one
-build pipeline in the codebase.
+The same `builder.Engine` powers CLI, MCP, and GUI — there is exactly one build pipeline in the codebase.
 
 ---
 
@@ -254,10 +246,8 @@ build pipeline in the codebase.
 - ✅ `%LOCALAPPDATA%` for app data, never `Program Files`
 - ✅ Stable machine-readable error codes
 - ✅ PE verification on every output EXE
-- ✅ Apple / iOS 26 "Liquid Glass" UI (translucent glassy blur, not
-  Material / Bootstrap / cyberpunk), with light/dark/auto theme
-- ✅ Accessibility: keyboard navigation, visible focus rings, ARIA roles,
-  reduced-motion support, dual-pane SMS, `visually-hidden` labels
+- ✅ Apple / iOS 26 "Liquid Glass" UI (translucent glassy blur, not Material / Bootstrap / cyberpunk), with light/dark/auto theme
+- ✅ Accessibility: keyboard navigation, visible focus rings, ARIA roles, reduced-motion support, dual-pane SMS, `visually-hidden` labels
 
 ---
 
