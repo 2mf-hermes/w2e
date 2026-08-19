@@ -2,8 +2,8 @@
 # Cross-platform build + GitHub Release on tag push.
 #
 # Triggers on tags matching v* (e.g. v1.0.0, v1.2.3-beta.1).
-# Builds natively on each runner — no cross-C toolchains needed.
-# Attaches: w2e-{platform}{ext}, w2e-mcp-{platform}{ext}, checksums, source tarball.
+# Builds natively on each runner — no cross-C-toolchains needed.
+# Attaches: w2e-{platform}{ext}, w2e-mcp-{platform}{ext}, checksums.
 
 name: Release
 
@@ -13,7 +13,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write          # needed to create the GitHub Release + upload assets
+  contents: write
 
 jobs:
   # ── 1. Build on Windows ──────────────────────────────────────
@@ -24,13 +24,13 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"        # minimum; toolchain directive fetches 1.25
+          go-version: "1.23"
 
       - name: Extract version
         id: ver
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}"            # e.g. v1.0.0
+          $tag = "${{ github.ref_name }}"
           $version = $tag -replace '^v',''
           echo "version=$version"  >> "$env:GITHUB_OUTPUT"
           echo "tag=$tag"          >> "$env:GITHUB_OUTPUT"
@@ -76,8 +76,8 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc libwebkit2gtk-4.1-dev libgtk-3-dev
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc libwebkit2gtk-4.1-dev libgtk-3-dev
 
       - name: Extract version
         id: ver
@@ -117,18 +117,9 @@ jobs:
             w2e-linux
             w2e-mcp-linux
 
-  # ── 3. Build on macOS (ARM64 + AMD64) ────────────────────────
+  # ── 3. Build on macOS (Apple Silicon ARM64) ──────────────────
   build-macos:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest          # ARM64 (Apple Silicon)
-            arch: arm64
-            suffix: darwin-arm64
-          - os: macos-13              # AMD64 (Intel)
-            arch: amd64
-            suffix: darwin-amd64
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -148,33 +139,31 @@ jobs:
       - name: Build w2e
         env:
           CGO_ENABLED: "1"
-          GOARCH: ${{ matrix.arch }}
         run: |
           VERSION="${{ steps.ver.outputs.version }}"
           COMMIT="${{ steps.ver.outputs.commit }}"
           go build \
             -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
-            -o "w2e-${{ matrix.suffix }}" \
+            -o "w2e-darwin-arm64" \
             "./cmd/w2e"
 
       - name: Build w2e-mcp
         env:
           CGO_ENABLED: "1"
-          GOARCH: ${{ matrix.arch }}
         run: |
           VERSION="${{ steps.ver.outputs.version }}"
           COMMIT="${{ steps.ver.outputs.commit }}"
           go build \
             -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
-            -o "w2e-mcp-${{ matrix.suffix }}" \
+            -o "w2e-mcp-darwin-arm64" \
             "./cmd/w2e-mcp"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-${{ matrix.suffix }}
+          name: macos-darwin-arm64
           path: |
-            w2e-${{ matrix.suffix }}
-            w2e-mcp-${{ matrix.suffix }}
+            w2e-darwin-arm64
+            w2e-mcp-darwin-arm64
 
   # ── 4. Create GitHub Release ─────────────────────────────────
   release:
@@ -198,7 +187,6 @@ jobs:
           # Ensure executables are executable (Linux/macOS)
           chmod +x release/w2e-linux release/w2e-mcp-linux
           chmod +x release/w2e-darwin-arm64 release/w2e-mcp-darwin-arm64
-          chmod +x release/w2e-darwin-amd64 release/w2e-mcp-darwin-amd64
 
           # Generate checksums
           cd release
@@ -224,16 +212,14 @@ jobs:
 
             ### Downloads
 
-            | Platform | File | Size |
-            |----------|------|------|
-            | Windows x64 | `w2e-windows.exe` | ~19 MB |
-            | Linux x64 | `w2e-linux` | ~16 MB |
-            | macOS ARM64 (Apple Silicon) | `w2e-darwin-arm64` | ~16 MB |
-            | macOS x64 (Intel) | `w2e-darwin-amd64` | ~16 MB |
-            | MCP Server (Windows) | `w2e-mcp-windows.exe` | ~15 MB |
-            | MCP Server (Linux) | `w2e-mcp-linux` | ~14 MB |
-            | MCP Server (macOS ARM64) | `w2e-mcp-darwin-arm64` | ~14 MB |
-            | MCP Server (macOS x64) | `w2e-mcp-darwin-amd64` | ~14 MB |
+            | Platform | File |
+            |----------|------|
+            | Windows x64 | `w2e-windows.exe` |
+            | Linux x64 | `w2e-linux` |
+            | macOS ARM64 (Apple Silicon) | `w2e-darwin-arm64` |
+            | MCP Server (Windows) | `w2e-mcp-windows.exe` |
+            | MCP Server (Linux) | `w2e-mcp-linux` |
+            | MCP Server (macOS ARM64) | `w2e-mcp-darwin-arm64` |
 
             ### Requirements
 
