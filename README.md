@@ -12,7 +12,7 @@ WebKit2GTK / WKWebView) pointed at an embedded `127.0.0.1:0` localhost
 server, so no console window, no Admin/UAC, and no Node.js/Python runtime is
 required on the user's machine.
 
-![w2e Screenshot](screenshot.png)
+![w2e Screenshot](screenshot/screenshot.png)
 
 It ships as two products from one codebase:
 

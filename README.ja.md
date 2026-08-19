@@ -8,7 +8,7 @@
 w2e は、あらゆる HTML/CSS/JS/SPA Web プロジェクトを Windows、Linux、macOS 上の**スタンドアロンのネイティブ実行ファイル**に変換します——1 つの Web プロジェクトで 3 つのターゲットに対応。生成された各実行ファイルは、システムの Webview（Edge WebView2 / WebKit2GTK / WKWebView）を起動し、内蔵された `127.0.0.1:0` ローカルサーバーに接続します。コンソールウィンドウ、管理者権限/UAC、Node.js/Python ランタイムは不要です。
 
 
-![w2e Screenshot](screenshot.png)
+![w2e Screenshot](screenshot/screenshot.png)
 
 1 つのコードベースから 2 つの製品を提供：
 

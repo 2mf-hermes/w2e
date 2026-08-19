@@ -8,7 +8,7 @@
 w2e 能將任何 HTML/CSS/JS/SPA 專案打包為 Windows、Linux、macOS 上的**獨立原生執行檔**——一個 Web 專案，三種目標平台。每個產生的執行檔會啟動系統內建的 Webview（Edge WebView2 / WebKit2GTK / WKWebView），連線到內嵌的 `127.0.0.1:0` 本機伺服器，不需要控制台視窗、不需要管理員權限/UAC，使用者的電腦也無需安裝 Node.js / Python。
 
 
-![w2e Screenshot](screenshot.png)
+![w2e Screenshot](screenshot/screenshot.png)
 
 一個程式碼庫提供兩項產品：
 
