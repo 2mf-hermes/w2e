@@ -1,0 +1,246 @@
+# .github/workflows/release.yml
+# Cross-platform build + GitHub Release on tag push.
+#
+# Triggers on tags matching v* (e.g. v1.0.0, v1.2.3-beta.1).
+# Builds natively on each runner — no cross-C toolchains needed.
+# Attaches: w2e-{platform}{ext}, w2e-mcp-{platform}{ext}, checksums, source tarball.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write          # needed to create the GitHub Release + upload assets
+
+jobs:
+  # ── 1. Build on Windows ──────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"        # minimum; toolchain directive fetches 1.25
+
+      - name: Extract version
+        id: ver
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"            # e.g. v1.0.0
+          $version = $tag -replace '^v',''
+          echo "version=$version"  >> "$env:GITHUB_OUTPUT"
+          echo "tag=$tag"          >> "$env:GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$env:GITHUB_OUTPUT"
+
+      - name: Build w2e.exe (GUI subsystem)
+        shell: pwsh
+        run: |
+          $ldflags = @(
+            "-X", "github.com/minfu/w2e/internal/version.Version=${{ steps.ver.outputs.version }}",
+            "-X", "github.com/minfu/w2e/internal/version.Commit=${{ steps.ver.outputs.commit }}",
+            "-X", "github.com/minfu/w2e/internal/version.BuildDate=${{ github.event.head_commit.timestamp }}",
+            "-H", "windowsgui"
+          ) -join " "
+          go build -ldflags "$ldflags" -o "w2e-windows.exe" ".\cmd\w2e"
+
+      - name: Build w2e-mcp.exe
+        shell: pwsh
+        run: |
+          $ldflags = @(
+            "-X", "github.com/minfu/w2e/internal/version.Version=${{ steps.ver.outputs.version }}",
+            "-X", "github.com/minfu/w2e/internal/version.Commit=${{ steps.ver.outputs.commit }}",
+            "-X", "github.com/minfu/w2e/internal/version.BuildDate=${{ github.event.head_commit.timestamp }}"
+          ) -join " "
+          go build -ldflags "$ldflags" -o "w2e-mcp-windows.exe" ".\cmd\w2e-mcp"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            w2e-windows.exe
+            w2e-mcp-windows.exe
+
+  # ── 2. Build on Linux ────────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libwebkit2gtk-4.1-dev libgtk-3-dev
+
+      - name: Extract version
+        id: ver
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION"  >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"          >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build w2e (CGO required for WebKit2GTK)
+        env:
+          CGO_ENABLED: "1"
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          COMMIT="${{ steps.ver.outputs.commit }}"
+          go build \
+            -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
+            -o "w2e-linux" \
+            "./cmd/w2e"
+
+      - name: Build w2e-mcp (CGO required for webview_go)
+        env:
+          CGO_ENABLED: "1"
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          COMMIT="${{ steps.ver.outputs.commit }}"
+          go build \
+            -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
+            -o "w2e-mcp-linux" \
+            "./cmd/w2e-mcp"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            w2e-linux
+            w2e-mcp-linux
+
+  # ── 3. Build on macOS (ARM64 + AMD64) ────────────────────────
+  build-macos:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest          # ARM64 (Apple Silicon)
+            arch: arm64
+            suffix: darwin-arm64
+          - os: macos-13              # AMD64 (Intel)
+            arch: amd64
+            suffix: darwin-amd64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Extract version
+        id: ver
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION"  >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"          >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build w2e
+        env:
+          CGO_ENABLED: "1"
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          COMMIT="${{ steps.ver.outputs.commit }}"
+          go build \
+            -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
+            -o "w2e-${{ matrix.suffix }}" \
+            "./cmd/w2e"
+
+      - name: Build w2e-mcp
+        env:
+          CGO_ENABLED: "1"
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          COMMIT="${{ steps.ver.outputs.commit }}"
+          go build \
+            -ldflags "-X github.com/minfu/w2e/internal/version.Version=$VERSION -X github.com/minfu/w2e/internal/version.Commit=$COMMIT" \
+            -o "w2e-mcp-${{ matrix.suffix }}" \
+            "./cmd/w2e-mcp"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.suffix }}
+          path: |
+            w2e-${{ matrix.suffix }}
+            w2e-mcp-${{ matrix.suffix }}
+
+  # ── 4. Create GitHub Release ─────────────────────────────────
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+
+          # Flatten artifact directories
+          find artifacts -type f -exec cp {} release/ \;
+
+          # Ensure executables are executable (Linux/macOS)
+          chmod +x release/w2e-linux release/w2e-mcp-linux
+          chmod +x release/w2e-darwin-arm64 release/w2e-mcp-darwin-arm64
+          chmod +x release/w2e-darwin-amd64 release/w2e-mcp-darwin-amd64
+
+          # Generate checksums
+          cd release
+          sha256sum * > SHA256SUMS.txt
+          cd ..
+
+          # Show what we're uploading
+          echo "=== Release assets ==="
+          ls -lh release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "w2e ${{ github.ref_name }}"
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          body: |
+            ## w2e ${{ github.ref_name }}
+
+            Web → Native EXE packager for Windows, Linux, and macOS.
+
+            ### Downloads
+
+            | Platform | File | Size |
+            |----------|------|------|
+            | Windows x64 | `w2e-windows.exe` | ~19 MB |
+            | Linux x64 | `w2e-linux` | ~16 MB |
+            | macOS ARM64 (Apple Silicon) | `w2e-darwin-arm64` | ~16 MB |
+            | macOS x64 (Intel) | `w2e-darwin-amd64` | ~16 MB |
+            | MCP Server (Windows) | `w2e-mcp-windows.exe` | ~15 MB |
+            | MCP Server (Linux) | `w2e-mcp-linux` | ~14 MB |
+            | MCP Server (macOS ARM64) | `w2e-mcp-darwin-arm64` | ~14 MB |
+            | MCP Server (macOS x64) | `w2e-mcp-darwin-amd64` | ~14 MB |
+
+            ### Requirements
+
+            - **Build**: Go 1.23+ (for building from source)
+            - **Runtime**: Platform Webview (WebView2 / WebKit2GTK / WKWebView)
+
+            ### Checksums
+
+            See `SHA256SUMS.txt` for file integrity verification.
+          files: release/*
