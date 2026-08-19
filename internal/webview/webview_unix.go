@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
+	goruntime "runtime"
 
 	webview "github.com/webview/webview_go"
 
 	"github.com/minfu/w2e/internal/browser"
-	"github.com/minfu/w2e/internal/runtime"
+	w2eruntime "github.com/minfu/w2e/internal/runtime"
 )
 
 // Options describe a webview window launch.
@@ -35,7 +35,7 @@ type Options struct {
 type App struct {
 	wv      webview.WebView
 	opts    Options
-	detDesc runtime.Detection
+	detDesc w2eruntime.Detection
 }
 
 // New constructs the webview window. Returns an error if the underlying
@@ -44,7 +44,7 @@ func New(opts Options) (*App, error) {
 	opts = withDefaults(opts)
 	dataDir := defaultDataDir(opts.AppID)
 	_ = os.MkdirAll(dataDir, 0o755)
-	det := runtime.Detect()
+	det := w2eruntime.Detect()
 
 	w := webview.New(opts.Debug)
 	if w == nil {
@@ -94,7 +94,7 @@ func (a *App) Bind(name string, f interface{}) error { return a.wv.Bind(name, f)
 func (a *App) Terminate()                     { a.wv.Terminate() }
 func (a *App) Destroy()                       { a.wv.Destroy() }
 func (a *App) CloseWindow()                   { a.wv.Destroy() }
-func (a *App) Detection() runtime.Detection   { return a.detDesc }
+func (a *App) Detection() w2eruntime.Detection { return a.detDesc }
 
 // WindowHandle returns 0 on non-Windows (native dialogs are stubbed out).
 func (a *App) WindowHandle() uintptr { return 0 }
@@ -126,7 +126,7 @@ func withDefaults(o Options) Options {
 }
 
 func defaultDataDir(appID string) string {
-	switch runtime.GOOS {
+	switch goruntime.GOOS {
 	case "darwin":
 		home, _ := os.UserHomeDir()
 		return filepath.Join(home, "Library", "Application Support", "w2e", appID)
