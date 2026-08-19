@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <b>🌐 お好みの言語でご覧ください：</b><br>
   <a href="README.md">English</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a>
 </p>
@@ -6,6 +6,9 @@
 # w2e — Web → ネイティブ EXE パッケージャ（Windows · Linux · macOS）
 
 w2e は、あらゆる HTML/CSS/JS/SPA Web プロジェクトを Windows、Linux、macOS 上の**スタンドアロンのネイティブ実行ファイル**に変換します——1 つの Web プロジェクトで 3 つのターゲットに対応。生成された各実行ファイルは、システムの Webview（Edge WebView2 / WebKit2GTK / WKWebView）を起動し、内蔵された `127.0.0.1:0` ローカルサーバーに接続します。コンソールウィンドウ、管理者権限/UAC、Node.js/Python ランタイムは不要です。
+
+
+![w2e Screenshot](screenshot.png)
 
 1 つのコードベースから 2 つの製品を提供：
 

@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <b>🌐 请选择您的语言：</b><br>
   <a href="README.md">English</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a>
 </p>
@@ -6,6 +6,9 @@
 # w2e — Web → 原生 EXE 打包工具（Windows · Linux · macOS）
 
 w2e 能将任何 HTML/CSS/JS/SPA 项目打包为 Windows、Linux、macOS 上的**独立原生可执行文件**——一个 Web 项目，三种目标平台。每个生成的执行文件会启动系统内置的 Webview（Edge WebView2 / WebKit2GTK / WKWebView），连接到内嵌的 `127.0.0.1:0` 本机服务器，无需控制台窗口、无需管理员权限/UAC，用户的电脑也无需安装 Node.js / Python。
+
+
+![w2e Screenshot](screenshot.png)
 
 一个代码库提供两款产品：
 
